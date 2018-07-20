@@ -1,0 +1,34 @@
+﻿QID,OldItem,OldItemNo,OldSection,NewItem
+Q01,Staff are good at explaining things.,1,Teaching and Learning,1. Staff are good at explaining things.
+Q02,Staff have made the subject interesting.,2,Teaching and Learning,2. Staff have made the subject interesting.
+OLD01,Staff are enthusiastic about what they are teaching.,3,Teaching and Learning,
+Q03,The course is intellectually stimulating.,4,Teaching and Learning,3. The course is intellectually stimulating.
+Q08,The criteria used in marking have been clear in advance.,5,Assessment and Feedback,8. The criteria used in marking have been clear in advance.
+Q09,Assessment arrangements and marking have been fair.,6,Assessment and Feedback,9. Marking and assessment has been fair.
+Q10,Feedback on my work has been prompt.,7,Assessment and Feedback,"10. Feedback on my work has been timely.
+"
+Q11,I have received detailed comments on my work.,8,Assessment and Feedback,11. I have received helpful comments on my work.
+OLD02,Feedback on my work has helped me clarify things I did not understand.,9,Assessment and Feedback,
+Q13,I have received sufficient advice and support with my studies.,10,Academic Support,13. I have received sufficient advice and guidance in relation to my course.
+Q12,I have been able to contact staff when I needed to.,11,Academic Support,12. I have been able to contact staff when I needed to.
+Q14,Good advice was available when I needed to make study choices.,12,Academic Support,14. Good advice was available when I needed to make study choices on my course.
+Q16,The timetable works efficiently as far as my activities are concerned.,13,Organisation and Management,16. The timetable works efficiently for me.
+Q17,Any changes in the course or teaching have been communicated effectively.,14,Organisation and Management,17. Any changes in the course or teaching have been communicated effectively.
+Q15,The course is well organised and is running smoothly.,15,Organisation and Management,15. The course is well organised and running smoothly.
+Q19,The library resources and services are good enough for my needs.,16,Learning Resources,"19. The library resources (e.g. books, online services and learning spaces) have supported my learning well."
+Q18,I have been able to access general IT resources when I needed to.,17,Learning Resources,18. The IT resources and facilities provided have supported my learning well.
+Q20,"I have been able to access specialised equipment, facilities or rooms when I needed to.",18,Learning Resources,"20. I have been able to access course-specific resources (e.g. equipment, facilities, software, collections) when I needed to."
+OLD03,The course has helped me present myself with confidence.,19,Personal Development,
+OLD04,My communication skills have improved.,20,Personal Development,
+OLD05,"As a result of the course, I feel confident in tackling unfamiliar problems.",21,Personal Development,
+Q27,"Overall, I am satisfied with the quality of the course.",22,Overall Satisfaction,"27. Overall, I am satisfied with the quality of the course."
+Q04,,,Teaching and Learning,4. My course has challenged me to achieve my best work.
+Q05,,,Learning opportunities,5. My course has provided me with opportunities to explore ideas or concepts in depth.
+Q06,,,Learning opportunities,6. My course has provided me with opportunities to bring information and ideas together from different topics.
+Q07,,,Learning opportunities,7. My course has provided me with opportunities to apply what I have learnt.
+Q21,,,Learning community,21. I feel part of a community of staff and students.
+Q22,,,Learning community,22. I have had the right opportunities to work with other students as part of my course.
+Q23,,,Student Voice,23. I have had the right opportunities to provide feedback on my course.
+Q24,,,Student Voice,24. Staff value students’ views and opinions about the course.
+Q25,,,Student Voice,25. It is clear how students’ feedback on the course has been acted on.
+Q26,,,Student Voice,26. The students’ union (association or guild) effectively represents students’ academic interests.
