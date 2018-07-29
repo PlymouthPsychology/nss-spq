@@ -32,6 +32,7 @@ df$Category<-'Category'
 df$Question<-'Q00'
 df$Text<-'Item content'
 
+
 # create Question lables for >=2017 surveys
 df$Question[df$Year>=2017]<-df$Item[df$Year>=2017]
 
@@ -61,7 +62,7 @@ df$Question[df$Year<2017 & df$Item=='Q22']<-'Q27'
 
 # create Category Labels
 df$Category[df$Question=='OLD03'|df$Question=='Q01'|df$Question=='Q02'|df$Question=='Q03'|df$Question=='Q04']<-'The teaching on my course'
-df$Category[df$Question=='OLD05'|df$Question=='Q06'|df$Question=='Q07']<-'Learning opportunities'
+df$Category[df$Question=='Q05'|df$Question=='Q06'|df$Question=='Q07']<-'Learning opportunities'
 df$Category[df$Question=='OLD09'|df$Question=='Q08'|df$Question=='Q09'|df$Question=='Q10'|df$Question=='Q11']<-'Assessment and feedback'
 df$Category[df$Question=='Q12'|df$Question=='Q13'|df$Question=='Q14']<-'Academic support'
 df$Category[df$Question=='Q15'|df$Question=='Q16'|df$Question=='Q17']<-'Organisation and management'
@@ -112,18 +113,46 @@ df$Text[df$Question=='Q27']<-'27 Overall, I am satisfied with the quality of the
 df$Provider<-as.factor(df$Provider)
 df$Subject<-as.factor(df$Subject)
 df$Item<-as.factor(df$Item)
+df$Category<-as.factor(df$Category)
+df$Question<-as.factor(df$Question)
+
 
 #table(df$Item,df$Year)
 #boxplot(Agree ~ Year, data=df)
 
-# retain ratings for single item from Psychology for all providers, all years
-pdata<-df %>% filter(Item=='Q01' & grepl('Psychology', Subject)) %>% select(Provider, Year, Agree)
 
-# compute ratings for single category from Psychology for each providers, all years
-pdata<-df %>% filter(Category=='The teaching on my course' & grepl('Psychology', Subject)) %>% 
-              select(Provider, Year, Agree) %>% 
-              group_by(Provider, Year) %>%
-              summarise(Agree=mean(Agree))
+######################################
+
+#  density plots with 25%, median, 75% and plymouth line, faceted by year - 
+# EITHER CHOOSE ONE ITEM.....
+# 1. retain ratings for single item from a subject for all providers, all years
+ptitle='Psychology'
+pques='Q27'
+pdata<-df %>% filter(Question==pques & grepl(ptitle, Subject)) %>% 
+  select(Provider, Year, Category, Question, Agree)
+# compute quantiles over all providers for each year, by Question
+pmeans<-pdata %>% group_by(Year, Question)  %>% summarise(yearvlow=quantile(Agree,0.10),
+                                                          yearlower=quantile(Agree,0.25),
+                                                          yearmedian=quantile(Agree,0.5),
+                                                          yearupper=quantile(Agree,0.75),
+                                                          yearvhigh=quantile(Agree,0.90))
+
+# OR (BETTER) CHOOSE A CATEGORY
+# 1. compute ratings for single category from subject for all providers, all years
+ptitle='Psychology'
+pques='The teaching on my course'
+pdata<-df %>% filter(Category==pques & grepl(ptitle, Subject)) %>% 
+  select(Provider, Year, Category, Question, Agree) %>% 
+  group_by(Provider, Year, Category) %>%
+  summarise(Agree=mean(Agree))
+# compute quantiles over all providers for each year, by Category
+pmeans<-pdata %>% group_by(Year, Category)  %>% summarise(yearvlow=quantile(Agree,0.10),
+                                                          yearlower=quantile(Agree,0.25),
+                                                          yearmedian=quantile(Agree,0.5),
+                                                          yearupper=quantile(Agree,0.75),
+                                                          yearvhigh=quantile(Agree,0.90))
+
+
 
 
 # isolate Plymouth's data
@@ -131,36 +160,134 @@ uop<-pdata %>% filter(  Provider=='University of Plymouth'
                         | Provider=="UNIVERSITY OF PLYMOUTH" 
                         | Provider=='Plymouth University' )
 
-# compute quantiles over all providers for each year
-pmeans<-pdata %>% group_by(Year)  %>% summarise(yearvlow=quantile(Agree,0.10),
-                                                yearlower=quantile(Agree,0.25),
-                                                yearmedian=quantile(Agree,0.5),
-                                                yearupper=quantile(Agree,0.75),
-                                                yearvhigh=quantile(Agree,0.90))
-
-#  density plots with 25%, median, 75% and plymouth line, faceted by year
-p<-ggplot(pdata,  aes(x=Agree))+
+ggplot(pdata,  aes(x=Agree))+
   ylab("")+scale_x_continuous(limits = c(.7, 1))+
   geom_density(adjust=.5, fill="blue", alpha=0.6, linetype=0)+
-  geom_vline(data=pmeans,aes(xintercept=yearmean),  size=1) +
+  geom_vline(data=pmeans,aes(xintercept=yearmedian),  size=1) +
   geom_vline(data=pmeans,aes(xintercept=yearlower),  size=.5) +
   geom_vline(data=pmeans,aes(xintercept=yearupper),  size=.5) +
   geom_vline(data=uop,aes(xintercept=Agree),  colour="red", size=.5) +
+  ggtitle(paste(ptitle,pques))+
   theme(axis.text.y=element_blank(),
         axis.ticks=element_blank(),
-        plot.background=element_rect(fill = "white"))+
+        panel.background=element_rect(fill = "white"))+
     facet_grid(Year ~ .)
-p
+ggsave(paste0(ptitle,pques,".png"), width=20, height = 12, units='cm')
+
+
+
+########################################
 
 # ribbon plot with 10-90 in light grey, 25-75 mid grey, median line,  plymouth in red
-p<-ggplot(uop, aes(x=Year, y=Agree))+
+# 2. compute ratings for single category from Psychology for each providers, all years
+ptitle='Psychology'
+pques='The teaching on my course'
+
+pdata<-df %>% filter(Category==pques & grepl(ptitle, Subject)) %>% 
+  select(Provider, Year, Category, Question, Agree) %>% 
+  group_by(Provider, Year) %>%
+  summarise(Agree=mean(Agree))
+# isolate Plymouth's data
+uop<-pdata %>% filter(  Provider=='University of Plymouth' 
+                        | Provider=="UNIVERSITY OF PLYMOUTH" 
+                        | Provider=='Plymouth University' )
+# compute quantiles over all providers for each year, by Question
+pmeans<-pdata %>% group_by(Year, Question)  %>% summarise(yearvlow=quantile(Agree,0.10),
+                                                          yearlower=quantile(Agree,0.25),
+                                                          yearmedian=quantile(Agree,0.5),
+                                                          yearupper=quantile(Agree,0.75),
+                                                          yearvhigh=quantile(Agree,0.90))
+ggplot(uop, aes(x=Year, y=Agree))+
   scale_y_continuous(limits = c(.7, 1))+
   geom_ribbon(data=pmeans, aes(x=Year, y=yearmedian, ymin=yearvlow, ymax=yearvhigh),fill="grey90")+
   geom_ribbon(data=pmeans, aes(x=Year, y=yearmedian, ymin=yearlower, ymax=yearupper),fill="grey80")+
   geom_line(colour="red")+
   geom_line(data=pmeans, aes(x=Year, y=yearmedian))+
-  ggtitle("The teaching on my course")+
+  ggtitle(paste(ptitle, pques))+
   theme(panel.background=element_blank())
-p
-ggsave("Teaching.png", width=20, height = 12, units='cm')
+ggsave(paste0(ptitle,pques,".png"), width=20, height = 12, units='cm')
+
+##################################
+
+# boxplots for each Item for a school 
+# uses pdata and uop
+# 3. get data for a single subject, all providers, all years
+ptitle<-'Psychology'   # choose subject to match content in JACS2 field
+pyear<-2018 # choose year to plot
+
+pdata<-df %>% filter(grepl(ptitle, Subject)) %>% select(Provider, Year, Category, Question, Agree)
+# isolate Plymouth's data
+uop<-pdata %>% filter(  Provider=='University of Plymouth' 
+                        | Provider=="UNIVERSITY OF PLYMOUTH" 
+                        | Provider=='Plymouth University' )
+
+uopy<-uop %>% filter(Year==pyear)
+pdatay <- pdata %>% filter(Year==pyear)
+
+p<-ggplot(pdatay, aes(x=Question, y=Agree))+
+  geom_boxplot(outlier.colour='white')+
+  ggtitle(paste("Sector:",ptitle,pyear))+
+  theme(panel.background=element_blank())
+p+geom_point(data=uopy, aes(x=Question, y=Agree),colour='red')
+ggsave(paste0("Items",ptitle,pyear".png"), width=20, height = 12, units='cm')
+
+
+################################
+
+# boxplots for each Category for a school for a year
+# 4. compute data for each Category within Psychology, all providers and years
+ptitle<-'Psychology'  # choose subject to match content in JACS2 field
+pyear<-2018 # choose year to plot
+
+pdata<-df %>% filter(grepl(ptitle, Subject)) %>% 
+  select(Provider, Year, Category, Question, Agree) %>% 
+  group_by(Provider, Year, Category) %>%
+  summarise(Agree=mean(Agree))
+
+uop<-pdata %>% filter(  Provider=='University of Plymouth' 
+                        | Provider=="UNIVERSITY OF PLYMOUTH" 
+                        | Provider=='Plymouth University' )
+
+uopy<-uop %>% filter(Year==pyear) %>% group_by(Category) %>% summarise(Agree=mean(Agree))
+pdatay <- pdata %>% filter(Year==pyear)
+
+p<-ggplot(pdatay, aes(x=Category, y=Agree))+
+  geom_boxplot(outlier.colour='white')+
+  geom_dotplot(binaxis='y', stackdir='center', binwidth=1/100, fill='grey70', alpha=.5, colour=NA)+
+  xlab("")+
+  ggtitle(paste("Sector:",ptitle,pyear))+
+  theme(panel.background=element_blank(), 
+        axis.text.x = element_text(angle = 90, hjust = 1))
+p+geom_point(data=uopy, aes(x=Category, y=Agree),colour='red')
+ggsave(paste0("Categories",ptitle,pyear,".png"), width=20, height = 12, units='cm')
+
+######################################################
+
+# boxplots for each Category for a school against Plymouth
+# 5. compute data for each Category all courses and years
+
+ptitle<-'Psychology'  # choose subject to match content in JACS2 field
+pyear<-2018 # choose year to plot
+
+pdata<-df %>% 
+  select(Provider, Year, Subject, Category, Question, Agree) %>% 
+  group_by(Provider, Year, Subject, Category) %>%
+  summarise(Agree=mean(Agree))
+
+uop<-pdata %>% filter(  Provider=='University of Plymouth' 
+                        | Provider=="UNIVERSITY OF PLYMOUTH" 
+                        | Provider=='Plymouth University' )
+
+sopy<-uop %>% filter(Year==pyear & grepl(ptitle,Subject)) 
+pdatay <- uop %>% filter(Year==pyear) 
+
+p<-ggplot(pdatay, aes(x=Category, y=Agree))+
+  geom_boxplot(outlier.colour='white')+
+  geom_dotplot(binaxis='y', stackdir='center', binwidth=1/100, fill='grey70', alpha=.5, colour=NA)+
+  xlab("")+
+  ggtitle(paste("Plymouth v ",ptitle,pyear))+
+  theme(panel.background=element_blank(), 
+        axis.text.x = element_text(angle = 90, hjust = 1))
+p+geom_point(data=uopy, aes(x=Category, y=Agree),colour='red')
+ggsave(paste0("Plymouth-",ptitle,pyear,".png"), width=20, height = 12, units='cm')
 
