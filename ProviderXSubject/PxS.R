@@ -1,4 +1,5 @@
-
+## Jon May 01.08.18
+## visualise NSS scores using half a million lines of data from OfS
 
 library(readr)
 library(tidyverse)
@@ -67,7 +68,7 @@ df$Category[df$Question=='OLD09'|df$Question=='Q08'|df$Question=='Q09'|df$Questi
 df$Category[df$Question=='Q12'|df$Question=='Q13'|df$Question=='Q14']<-'Academic support'
 df$Category[df$Question=='Q15'|df$Question=='Q16'|df$Question=='Q17']<-'Organisation and management'
 df$Category[df$Question=='Q18'|df$Question=='Q19'|df$Question=='Q20']<-'Learning resources'
-df$Category[df$Question=='OLD18'|df$Question=='OLD19'|df$Question=='OLD20']<-'Personal development'
+df$Category[df$Question=='OLD18'|df$Question=='OLD19'|df$Question=='OLD20'|df$Question=='OLD21']<-'Personal development'
 df$Category[df$Question=='Q21'|df$Question=='Q22']<-'Learning community'
 df$Category[df$Question=='Q23'|df$Question=='Q24'|df$Question=='Q25']<-'Student voice'
 df$Category[df$Question=='Q26']<-'Student Union'
@@ -117,7 +118,7 @@ df$Category<-as.factor(df$Category)
 df$Question<-as.factor(df$Question)
 
 
-#table(df$Item,df$Year)
+#table(df$Item,df$Category)
 #boxplot(Agree ~ Year, data=df)
 
 
@@ -229,7 +230,7 @@ p<-ggplot(pdatay, aes(x=Question, y=Agree))+
   ggtitle(paste("Sector:",ptitle,pyear))+
   theme(panel.background=element_blank())
 p+geom_point(data=uopy, aes(x=Question, y=Agree),colour='red')
-ggsave(paste0("Items",ptitle,pyear".png"), width=20, height = 12, units='cm')
+ggsave(paste0("Items",ptitle,pyear,".png"), width=20, height = 12, units='cm')
 
 
 ################################
@@ -251,15 +252,44 @@ uop<-pdata %>% filter(  Provider=='University of Plymouth'
 uopy<-uop %>% filter(Year==pyear) %>% group_by(Category) %>% summarise(Agree=mean(Agree))
 pdatay <- pdata %>% filter(Year==pyear)
 
-p<-ggplot(pdatay, aes(x=Category, y=Agree))+
+ggplot(pdatay, aes(x=Category, y=Agree))+
   geom_boxplot(outlier.colour='white')+
   geom_dotplot(binaxis='y', stackdir='center', binwidth=1/100, fill='grey70', alpha=.5, colour=NA)+
-  xlab("")+
-  ggtitle(paste("Sector:",ptitle,pyear))+
-  theme(panel.background=element_blank(), 
+  xlab("")+ylim(c(0,1))+
+  ggtitle(pyear)+
+  #annotate('text',x=5,y=.5,label=pyear,fontface = 1, size=20, colour='grey90', alpha=.5)+
+  geom_point(data=uopy, aes(x=Category, y=Agree),colour='red')+
+  theme(plot.title=element_text(vjust=-80, hjust=.5, colour='grey80', size=100),
+        panel.background=element_blank(), 
         axis.text.x = element_text(angle = 90, hjust = 1))
-p+geom_point(data=uopy, aes(x=Category, y=Agree),colour='red')
 ggsave(paste0("Categories",ptitle,pyear,".png"), width=20, height = 12, units='cm')
+
+## same as the above but ANIMATED! Rosling style. 
+## gganimate is not on CRAN, so needs to be installed using 
+## devtools::install_github("dgrtwo/gganimate")
+## which also assumes that you have installed devtools
+## NB this assumes you are using the version of gganimate updated in July 2018 
+
+
+library(gganimate)
+p<-ggplot(pdata, aes(x=Category, y=Agree, frame=Year))+
+  geom_boxplot(outlier.colour=NA)+
+  geom_dotplot(binaxis='y', stackdir='center', binwidth=1/100, fill='grey70', alpha=.5, colour=NA)+
+  geom_point(data=uop, aes(x=Category, y=Agree),colour='red')+
+  labs(x="", title = '{frame_time}')+
+  ylim(c(0.5,1))+
+  theme_minimal(base_size = 12, base_family = "Helvetica") +
+  theme(plot.title=element_text(vjust=-80, hjust=.5, colour='grey80', size=100),
+        panel.background=element_blank(), 
+        axis.text.x = element_text(angle = 90, hjust = 1))+
+  transition_time(Year)+
+#  transition_states(transition_length = 2, state_length = 1) +
+   enter_fade() + 
+   exit_shrink() +
+   ease_aes('sine-in-out')
+p
+anim_save(paste0(ptitle,"_Categories2",".gif"))
+
 
 ######################################################
 
